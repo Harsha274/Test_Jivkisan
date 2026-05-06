@@ -6,7 +6,7 @@
       <class name="com.jivkisan.runners.RunCucumberTest">
         <methods>
           <include name="setUpClass"/>
-          <include name="runScenario" invocation-numbers="3"/>
+          <include name="runScenario" invocation-numbers="5"/>
           <include name="tearDownClass"/>
         </methods>
       </class> <!-- com.jivkisan.runners.RunCucumberTest -->

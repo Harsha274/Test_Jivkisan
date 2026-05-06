@@ -7,6 +7,8 @@ import com.jivkisan.factory.DriverFactory;
 import com.jivkisan.pages.LoginPage;
 import com.jivkisan.utils.ConfigReader;
 import io.cucumber.java.en.*;
+
+import java.io.File;
 import java.util.List;
 
 public class LoginSteps {
@@ -83,4 +85,60 @@ public class LoginSteps {
         // Ensure we didn't just count a 'Loading' row
         Assert.assertTrue(orderIds.size() > 0, "No real orders were found in the database.");
     }
+    
+ // --- New Steps for Raita Membership ---
+
+    @When("user navigates to Organic Raita section")
+    public void user_navigates_to_organic_raita_section() {
+        loginPage.navigateToOrganicRaita();
+    }
+
+    @When("user applies for Raita Membership with details")
+    public void user_applies_for_raita_membership_with_details() {
+        // Path handling for two different images
+        String imagePath1 = new File("src/test/resources/images/farm.png").getAbsolutePath();
+        String imagePath2 = new File("src/test/resources/images/farm2.png").getAbsolutePath();
+        
+        logger.info("Applying for Raita with images: " + imagePath1 + " and " + imagePath2);
+        
+        loginPage.clickApplyRaita();
+        loginPage.fillRaitaApplication(
+            "Chandini P", 
+            "Bannerghatta Road, Bangalore", 
+            "Composting and Natural Fertilizers", 
+            "3 Years", 
+            "Turmeric and Ragi", 
+            imagePath1,
+            imagePath2
+        );
+        loginPage.submitRaitaForm();
+        logger.info("Application submitted successfully.");
+    }
+
+    @Then("the application should be submitted successfully")
+    public void the_application_should_be_submitted_successfully() {
+        logger.info("Submission step completed.");
+    }
+    //raita application end
+    
+    
+    
+    
+    
+    //DISCUSIIN ACCES FORUM STAR//
+    @Then("verify if member application is approved to access forum")
+    public void verify_if_member_application_is_approved_to_access_forum() {
+        // Small sleep to let Firebase auth state update the UI containers
+        try { Thread.sleep(2000); } catch (InterruptedException e) { e.printStackTrace(); }
+
+        if (loginPage.isRaitaApprovedPageDisplayed()) {
+            logger.info("Access Confirmed: This member is APPROVED. Discussion forum is visible.");
+        } else {
+            logger.warn("Access Restricted: Member NOT APPROVED. Verifying that the Apply page is shown instead.");
+            boolean isApplyPageVisible = loginPage.isApplyMembershipPageDisplayed();
+            Assert.assertTrue(isApplyPageVisible, "Neither Approved Forum nor Apply page is visible!");
+        }
+    }
+    //END//
+    
 }

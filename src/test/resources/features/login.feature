@@ -37,3 +37,29 @@ Then user should see product details and the final total value in the console
     And the Admin Panel should be visible
     And the user counts the total orders and applications
     
+ 
+  Scenario: Submit Raita Membership application
+    When user enters email "chandinip72@gmail.com" and password "Chandini123"
+    Then user should be logged in as "Chandini"
+    When user navigates to Organic Raita section
+    And user applies for Raita Membership with details
+    Then the application should be submitted successfully
+    
+    
+    
+    
+    
+    
+  Scenario: Access member-only discussion forum
+    When user enters email "chandinip72@gmail.com" and password "Chandini123"
+    Then user should be logged in as "Chandini"
+    When user navigates to Organic Raita section
+    Then verify if member application is approved to access forum
+    
+     Scenario: Access member-only discussion forum
+    When user enters email "harshask274@gmail.com" and password "Harsha123"
+    Then user should be logged in as "Harsha"
+    When user navigates to Organic Raita section
+    Then verify if member application is approved to access forum
+    
+    

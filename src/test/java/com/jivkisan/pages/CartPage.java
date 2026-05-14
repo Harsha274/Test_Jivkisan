@@ -2,6 +2,7 @@ package com.jivkisan.pages;
  
 import org.openqa.selenium.By;
 
+
 import org.openqa.selenium.JavascriptExecutor;
 
 import org.openqa.selenium.WebDriver;
@@ -17,6 +18,7 @@ import java.time.Duration;
 import java.util.ArrayList;
 
 import java.util.List;
+import java.util.Random;
  
 public class CartPage {
 
@@ -170,6 +172,107 @@ public class CartPage {
         System.out.println("==================================\n");
 
     }
+    
+    // Add these methods inside the CartPage class CART PERSISTENCE CHECKK
+    public void refreshPage() {
+        driver.navigate().refresh();
+        wait.until(d -> ((JavascriptExecutor) d).executeScript("return document.readyState").equals("complete"));
+    }
+ 
+    public void logout() {
+        // Assuming there is a profile/logout button. If not, we use JS to clear session or click logout.
+        // Based on common patterns, clicking the profile and then logout or a specific logout ID.
+        try {
+            WebElement profile = driver.findElement(By.id("profileName"));
+            profile.click();
+            driver.findElement(By.id("logoutBtn")).click(); // Adjust ID if different
+        } catch (Exception e) {
+            // Fallback: trigger logout via script if UI button is tricky
+            ((JavascriptExecutor) driver).executeScript("localStorage.clear(); sessionStorage.clear(); window.location.reload();");
+        }
+    }
+    //END
+    
+    public void updateUnitsRandomlyForSellerProducts() {
+        // Wait for products to load
+        wait.until(ExpectedConditions.visibilityOfAllElementsLocatedBy(productCards));
+        
+        // Locate all "Manage Stock" inputs (these only exist for products owned by the logged-in seller)
+        // Based on your HTML: id^='update-stock-'
+        By ownerInputLocator = By.cssSelector("input[id^='update-stock-']");
+        
+        List<WebElement> stockInputs = driver.findElements(ownerInputLocator);
+        Random rand = new Random();
 
-}
+        if (stockInputs.isEmpty()) {
+            System.out.println("LOG: No products found belonging to this seller.");
+            return;
+        }
+
+        for (WebElement input : stockInputs) {
+            try {
+                // Generate random units between 1 and 149
+                int randomUnits = rand.nextInt(149) + 1;
+
+                // Scroll to the input to ensure it's interactable
+                ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView({block: 'center'});", input);
+                
+                input.clear();
+                input.sendKeys(String.valueOf(randomUnits));
+
+                // Find the associated "Update" button next to this specific input
+                // Logic: It's the button immediately following the input
+                WebElement updateBtn = input.findElement(By.xpath("./following-sibling::button"));
+                updateBtn.click();
+
+                System.out.println("LOG: Successfully updated item ID [" + input.getAttribute("id") + "] to " + randomUnits + " units.");
+                
+                // Brief wait for the toast notification/Firebase update
+                Thread.sleep(1000); 
+                
+            } catch (Exception e) {
+                System.out.println("LOG: Failed to update a specific product: " + e.getMessage());
+            }
+        }
+    }
+    private final By searchAllProductsInput = By.cssSelector("#searchAllProducts");
+    private final By searchOrganicProductsInput = By.cssSelector("#searchOrganicProducts");
+    private final By organicOnlyLink = By.xpath("//a[contains(text(),'Organic Only')]"); // Adjust XPath based on your UI
+    // Add these methods to CartPage.java
+    public void navigateToOrganicOnly() {
+   	    WebElement link = wait.until(ExpectedConditions.elementToBeClickable(organicOnlyLink));
+   	    link.click();
+   	}
+
+   	public void searchProduct(String panelType, String productName) {
+   	    By locator = panelType.equalsIgnoreCase("Organic") ? searchOrganicProductsInput : searchAllProductsInput;
+   	    WebElement searchBox = wait.until(ExpectedConditions.visibilityOfElementLocated(locator));
+   	    searchBox.clear();
+   	    searchBox.sendKeys(productName);
+   	}
+
+   	public boolean isProductVisible(String productName) {
+   	    // 1. Add a small sleep or wait to allow the search filter to process
+   	    try { Thread.sleep(1000); } catch (InterruptedException e) { }
+
+   	    // 2. Use a more flexible XPath that looks for the text anywhere in the grid
+   	    // This ignores specific div structures that might change between panels
+   	    String dynamicXPath = "//*[contains(@id, 'grid')]//h3[contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), '" + productName.toLowerCase() + "')]";
+   	    
+   	    try {
+   	        WebElement product = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath(dynamicXPath)));
+   	        return product.isDisplayed();
+   	    } catch (Exception e) {
+   	        System.out.println("LOG: Product '" + productName + "' not found in DOM.");
+   	        return false;
+   	    }
+   	}
+    }
+
+
+
+    
+    
+
+
  

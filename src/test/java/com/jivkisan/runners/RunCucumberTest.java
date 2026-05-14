@@ -1,9 +1,9 @@
 package com.jivkisan.runners;
- 
+
 import io.cucumber.testng.AbstractTestNGCucumberTests;
 import io.cucumber.testng.CucumberOptions;
 import org.testng.annotations.DataProvider;
- 
+
 @CucumberOptions(
     features = "src/test/resources/features",
     glue = {"com.jivkisan.stepDefinitions", "com.jivkisan.hooks"},
@@ -15,8 +15,9 @@ import org.testng.annotations.DataProvider;
     monochrome = true
 )
 public class RunCucumberTest extends AbstractTestNGCucumberTests {
+    
     @Override
-    @DataProvider(parallel = false)
+    @DataProvider(parallel = true) // This enables parallel execution
     public Object[][] scenarios() {
         return super.scenarios();
     }
